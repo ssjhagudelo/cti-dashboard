@@ -2,155 +2,128 @@ name: Daily CTI Dashboard Rebuild
 
 on:
   schedule:
-    # Ejecuta todos los días a las 06:00 UTC (01:00 AM Colombia)
-    - cron: '0 6 * * *'
-  
-  # Permite lanzar el build manualmente desde la UI de GitHub
-  workflow_dispatch:
-
-  # También se re-genera en cada push al main
+    - cron: '0 6 * * *'   # 06:00 UTC = 01:00 AM Colombia
+  workflow_dispatch:        # Lanzar manualmente desde GitHub Actions
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  rebuild-dashboard:
+  build:
     runs-on: ubuntu-latest
-    
     permissions:
-      contents: write  # Necesario para hacer commit del HTML generado
+      contents: write
 
     steps:
-      # ── 1. Checkout de TU repositorio (donde vive el dashboard) ───────────
-      - name: Checkout repository
+      - name: Checkout tu repositorio
         uses: actions/checkout@v4
 
-      # ── 2. Clonar deepdarkCTI para tener los .md actualizados ─────────────
-      - name: Clone deepdarkCTI sources
+      - name: Clonar deepdarkCTI (fuente de datos)
         run: |
-          git clone --depth=1 https://github.com/fastfire/deepdarkCTI.git deepdark_sources
-          echo "Archivos descargados:"
-          ls deepdark_sources/*.md 2>/dev/null | head -20
+          git clone --depth=1 https://github.com/fastfire/deepdarkCTI.git /tmp/deepdarkcti
+          echo "Archivos disponibles:"
+          ls /tmp/deepdarkcti/*.md
 
-      # ── 3. Verificar que los archivos clave existen ────────────────────────
-      - name: Verify source files
-        run: |
-          FILES=(
-            "ransomware_gang.md"
-            "telegram_threat_actors.md"
-            "leak_sites.md"
-            "telegram_infostealer.md"
-            "maas.md"
-          )
-          for f in "${FILES[@]}"; do
-            if [ -f "deepdark_sources/$f" ]; then
-              COUNT=$(wc -l < "deepdark_sources/$f")
-              echo "✓ $f ($COUNT líneas)"
-            else
-              echo "⚠ $f no encontrado"
-            fi
-          done
-
-      # ── 4. Inyectar timestamp en el HTML y copiar al output ───────────────
-      - name: Inject build timestamp into dashboard
-        run: |
-          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
-          
-          # Copiar el dashboard base y actualizar el timestamp estático
-          cp dashboard/index.html docs/index.html 2>/dev/null || \
-          cp index.html docs/index.html 2>/dev/null || \
-          echo "Usando HTML en raíz"
-
-          # Si quieres pre-inyectar el timestamp en el HTML (opcional):
-          sed -i "s/Cargando fuentes…/Datos: ${TIMESTAMP}/" docs/index.html 2>/dev/null || true
-          
-          echo "Dashboard actualizado: $TIMESTAMP"
-
-      # ── 5. Generar metadata JSON (para APIs externas o n8n) ───────────────
-      - name: Generate metadata JSON
+      - name: Generar index.html con datos embebidos
         run: |
           python3 << 'EOF'
-          import json, re, os
+          import re, json, os
           from datetime import datetime, timezone
 
-          def count_entries(filepath):
-              """Cuenta líneas que contienen URLs como proxy de entradas."""
-              if not os.path.exists(filepath):
-                  return 0
-              with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                  lines = f.readlines()
-              return sum(1 for l in lines 
-                        if 'http' in l.lower() and not l.strip().startswith('#'))
+          def first_url(s):
+              m = re.search(r'https?://[^\s)"\|>]+', s or '')
+              return m.group(0).rstrip('.,;>)') if m else ''
 
-          def count_online(filepath):
-              if not os.path.exists(filepath):
-                  return 0
-              with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                  content = f.read()
-              return len(re.findall(r'ONLINE', content, re.IGNORECASE))
+          def parse_md_table(filepath):
+              try:
+                  with open(filepath, encoding='utf-8', errors='ignore') as f:
+                      text = f.read()
+              except:
+                  return []
+              entries = []
+              lines = text.strip().split('\n')
+              headers = []
+              seen_sep = False
+              for line in lines:
+                  line = line.strip()
+                  if not line:
+                      seen_sep = False; headers = []; continue
+                  if re.match(r'^\|[\s\-:|]+\|', line):
+                      seen_sep = True; continue
+                  if not (line.startswith('|') and line.endswith('|')):
+                      if seen_sep: seen_sep = False; headers = []
+                      continue
+                  cells = [c.strip() for c in line[1:-1].split('|')]
+                  if not seen_sep:
+                      headers = [re.sub(r'[^a-z0-9]+','_', c.lower()).strip('_') for c in cells]
+                      continue
+                  row = {headers[i] if i < len(headers) else f'_{i}': cells[i] for i in range(len(cells))}
+                  name_cell = row.get('name') or row.get('telegram') or row.get('_0', '')
+                  md = re.search(r'\[([^\]]+)\]\(([^)]+)\)', name_cell)
+                  name = md.group(1) if md else re.sub(r'<[^>]+>','', name_cell).strip()
+                  url  = md.group(2) if md else first_url(name_cell) or first_url(row.get('_1',''))
+                  status_raw = (row.get('status') or row.get('_1') or '').upper()
+                  status = ('online'  if any(x in status_raw for x in ['ONLINE','VALID']) else
+                            'offline' if any(x in status_raw for x in ['OFFLINE','EXPIRED']) else 'unknown')
+                  channel = (row.get('tox_id_or_other_channel') or row.get('threat_actor_name') or
+                             row.get('_2') or row.get('_3') or '')
+                  channel = re.sub(r'<[^>]+>','',channel).strip()
+                  if not name and not url: continue
+                  entries.append({'name': name, 'url': url, 'status': status, 'channel': channel})
+              return entries
 
-          sources = {
-              'ransomware_gang':        'deepdark_sources/ransomware_gang.md',
-              'telegram_threat_actors': 'deepdark_sources/telegram_threat_actors.md',
-              'leak_sites':             'deepdark_sources/leak_sites.md',
-              'telegram_infostealer':   'deepdark_sources/telegram_infostealer.md',
-              'maas':                   'deepdark_sources/maas.md',
+          files = {
+              'ransomware': '/tmp/deepdarkcti/ransomware_gang.md',
+              'telegram':   '/tmp/deepdarkcti/telegram_threat_actors.md',
+              'forum':      '/tmp/deepdarkcti/forum.md',
+              'stealer':    '/tmp/deepdarkcti/telegram_infostealer.md',
+              'maas':       '/tmp/deepdarkcti/maas.md',
           }
 
-          metadata = {
-              'last_updated': datetime.now(timezone.utc).isoformat(),
-              'source_repo': 'https://github.com/fastfire/deepdarkCTI',
-              'stats': {}
-          }
+          all_data = {}
+          for key, path in files.items():
+              data = parse_md_table(path)
+              all_data[key] = data
+              print(f"  {key}: {len(data)} entradas")
 
-          total = 0
-          for key, path in sources.items():
-              entries = count_entries(path)
-              online  = count_online(path)
-              total  += entries
-              metadata['stats'][key] = {
-                  'total_entries': entries,
-                  'online': online,
-                  'offline': max(0, entries - online)
-              }
+          build_ts = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+          data_js  = json.dumps(all_data, ensure_ascii=False)
+          total    = sum(len(v) for v in all_data.values())
+          print(f"  TOTAL: {total} entradas | Build: {build_ts}")
 
-          metadata['total_entries'] = total
-          
+          # Guardar metadata
           os.makedirs('docs', exist_ok=True)
           with open('docs/metadata.json', 'w') as f:
-              json.dump(metadata, f, indent=2)
-          
-          print(f"✓ Metadata generado: {total} entradas totales")
-          for k, v in metadata['stats'].items():
-              print(f"  {k}: {v['total_entries']} total, {v['online']} online")
+              json.dump({'last_updated': build_ts, 'total': total,
+                         'counts': {k: len(v) for k,v in all_data.items()}}, f)
+
+          # Leer template HTML y reemplazar placeholder de datos
+          with open('template.html', 'r', encoding='utf-8') as f:
+              template = f.read()
+
+          output = template.replace('__BUILD_TS__', build_ts).replace('__DATA_JSON__', data_js)
+
+          with open('docs/index.html', 'w', encoding='utf-8') as f:
+              f.write(output)
+
+          size_kb = os.path.getsize('docs/index.html') / 1024
+          print(f"  docs/index.html generado: {size_kb:.0f} KB")
           EOF
 
-      # ── 6. Commit y push del HTML + metadata actualizados ─────────────────
-      - name: Commit updated dashboard
+      - name: Commit y push
         run: |
-          git config user.name  "CTI Dashboard Bot"
+          git config user.name  "CTI Bot"
           git config user.email "cti-bot@noreply.github.com"
-          
-          git add docs/ 2>/dev/null || git add *.html metadata.json 2>/dev/null || true
-          
-          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
-          
-          # Solo hace commit si hay cambios reales
+          git add docs/
           if git diff --staged --quiet; then
-            echo "Sin cambios detectados, omitiendo commit."
+            echo "Sin cambios."
           else
-            git commit -m "chore: auto-rebuild CTI dashboard [${TIMESTAMP}]"
+            git commit -m "chore: rebuild CTI dashboard $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
-            echo "✓ Dashboard publicado en GitHub Pages"
           fi
 
-      # ── 7. (Opcional) Notificación a n8n webhook ──────────────────────────
-      - name: Notify n8n webhook
+      - name: (Opcional) Notificar webhook n8n
         if: ${{ vars.N8N_WEBHOOK_URL != '' }}
         run: |
           curl -s -X POST "${{ vars.N8N_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "event": "cti_dashboard_updated",
-              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
-              "metadata_url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/metadata.json"
-            }' || echo "Webhook no configurado, continuando..."
+            -d "{\"event\":\"cti_rebuild\",\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" || true
