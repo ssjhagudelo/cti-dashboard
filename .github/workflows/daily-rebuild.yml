@@ -1,1 +1,156 @@
+name: Daily CTI Dashboard Rebuild
 
+on:
+  schedule:
+    # Ejecuta todos los días a las 06:00 UTC (01:00 AM Colombia)
+    - cron: '0 6 * * *'
+  
+  # Permite lanzar el build manualmente desde la UI de GitHub
+  workflow_dispatch:
+
+  # También se re-genera en cada push al main
+  push:
+    branches: [ main ]
+
+jobs:
+  rebuild-dashboard:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # Necesario para hacer commit del HTML generado
+
+    steps:
+      # ── 1. Checkout de TU repositorio (donde vive el dashboard) ───────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Clonar deepdarkCTI para tener los .md actualizados ─────────────
+      - name: Clone deepdarkCTI sources
+        run: |
+          git clone --depth=1 https://github.com/fastfire/deepdarkCTI.git deepdark_sources
+          echo "Archivos descargados:"
+          ls deepdark_sources/*.md 2>/dev/null | head -20
+
+      # ── 3. Verificar que los archivos clave existen ────────────────────────
+      - name: Verify source files
+        run: |
+          FILES=(
+            "ransomware_gang.md"
+            "telegram_threat_actors.md"
+            "leak_sites.md"
+            "telegram_infostealer.md"
+            "maas.md"
+          )
+          for f in "${FILES[@]}"; do
+            if [ -f "deepdark_sources/$f" ]; then
+              COUNT=$(wc -l < "deepdark_sources/$f")
+              echo "✓ $f ($COUNT líneas)"
+            else
+              echo "⚠ $f no encontrado"
+            fi
+          done
+
+      # ── 4. Inyectar timestamp en el HTML y copiar al output ───────────────
+      - name: Inject build timestamp into dashboard
+        run: |
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+          
+          # Copiar el dashboard base y actualizar el timestamp estático
+          cp dashboard/index.html docs/index.html 2>/dev/null || \
+          cp index.html docs/index.html 2>/dev/null || \
+          echo "Usando HTML en raíz"
+
+          # Si quieres pre-inyectar el timestamp en el HTML (opcional):
+          sed -i "s/Cargando fuentes…/Datos: ${TIMESTAMP}/" docs/index.html 2>/dev/null || true
+          
+          echo "Dashboard actualizado: $TIMESTAMP"
+
+      # ── 5. Generar metadata JSON (para APIs externas o n8n) ───────────────
+      - name: Generate metadata JSON
+        run: |
+          python3 << 'EOF'
+          import json, re, os
+          from datetime import datetime, timezone
+
+          def count_entries(filepath):
+              """Cuenta líneas que contienen URLs como proxy de entradas."""
+              if not os.path.exists(filepath):
+                  return 0
+              with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                  lines = f.readlines()
+              return sum(1 for l in lines 
+                        if 'http' in l.lower() and not l.strip().startswith('#'))
+
+          def count_online(filepath):
+              if not os.path.exists(filepath):
+                  return 0
+              with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                  content = f.read()
+              return len(re.findall(r'ONLINE', content, re.IGNORECASE))
+
+          sources = {
+              'ransomware_gang':        'deepdark_sources/ransomware_gang.md',
+              'telegram_threat_actors': 'deepdark_sources/telegram_threat_actors.md',
+              'leak_sites':             'deepdark_sources/leak_sites.md',
+              'telegram_infostealer':   'deepdark_sources/telegram_infostealer.md',
+              'maas':                   'deepdark_sources/maas.md',
+          }
+
+          metadata = {
+              'last_updated': datetime.now(timezone.utc).isoformat(),
+              'source_repo': 'https://github.com/fastfire/deepdarkCTI',
+              'stats': {}
+          }
+
+          total = 0
+          for key, path in sources.items():
+              entries = count_entries(path)
+              online  = count_online(path)
+              total  += entries
+              metadata['stats'][key] = {
+                  'total_entries': entries,
+                  'online': online,
+                  'offline': max(0, entries - online)
+              }
+
+          metadata['total_entries'] = total
+          
+          os.makedirs('docs', exist_ok=True)
+          with open('docs/metadata.json', 'w') as f:
+              json.dump(metadata, f, indent=2)
+          
+          print(f"✓ Metadata generado: {total} entradas totales")
+          for k, v in metadata['stats'].items():
+              print(f"  {k}: {v['total_entries']} total, {v['online']} online")
+          EOF
+
+      # ── 6. Commit y push del HTML + metadata actualizados ─────────────────
+      - name: Commit updated dashboard
+        run: |
+          git config user.name  "CTI Dashboard Bot"
+          git config user.email "cti-bot@noreply.github.com"
+          
+          git add docs/ 2>/dev/null || git add *.html metadata.json 2>/dev/null || true
+          
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+          
+          # Solo hace commit si hay cambios reales
+          if git diff --staged --quiet; then
+            echo "Sin cambios detectados, omitiendo commit."
+          else
+            git commit -m "chore: auto-rebuild CTI dashboard [${TIMESTAMP}]"
+            git push
+            echo "✓ Dashboard publicado en GitHub Pages"
+          fi
+
+      # ── 7. (Opcional) Notificación a n8n webhook ──────────────────────────
+      - name: Notify n8n webhook
+        if: ${{ vars.N8N_WEBHOOK_URL != '' }}
+        run: |
+          curl -s -X POST "${{ vars.N8N_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "event": "cti_dashboard_updated",
+              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+              "metadata_url": "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/metadata.json"
+            }' || echo "Webhook no configurado, continuando..."
