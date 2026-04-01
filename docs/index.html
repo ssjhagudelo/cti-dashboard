@@ -15,13 +15,11 @@
     --accent2: #ff6b35;
     --accent3: #06d6a0;
     --accent4: #ffd166;
+    --blue: #4361ee;
     --text: #e8e8f0;
     --muted: #6e6e8a;
-    --glow: rgba(230,57,70,0.15);
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  * { margin:0; padding:0; box-sizing:border-box; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -30,511 +28,200 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* Scanline overlay */
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.04) 2px,
-      rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+    pointer-events:none;
+    z-index:1000;
   }
-
-  /* Header */
   header {
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-    position: sticky;
-    top: 0;
-    background: rgba(5,5,8,0.95);
-    backdrop-filter: blur(12px);
-    z-index: 100;
+    border-bottom:1px solid var(--border);
+    padding:0 32px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px; position:sticky; top:0;
+    background:rgba(5,5,8,0.97); backdrop-filter:blur(12px); z-index:100;
   }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
+  .logo { display:flex; align-items:center; gap:12px; }
   .logo-icon {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    animation: pulse-glow 3s ease-in-out infinite;
+    width:32px; height:32px; background:var(--accent);
+    clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+    animation:pulse-glow 3s ease-in-out infinite;
   }
-
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0); }
-    50% { box-shadow: 0 0 20px 4px rgba(230,57,70,0.4); }
+    0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}
+    50%{box-shadow:0 0 20px 4px rgba(230,57,70,0.4)}
   }
+  .logo-text { font-family:'Syne',sans-serif; font-weight:800; font-size:16px; letter-spacing:.05em; }
+  .logo-text span { color:var(--accent); }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .live-dot { width:8px; height:8px; background:var(--accent3); border-radius:50%; animation:blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  #lastUpdated { color:var(--muted); font-size:11px; }
 
-  .logo-text {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 16px;
-    letter-spacing: 0.05em;
-  }
+  .container { max-width:1440px; margin:0 auto; padding:28px 32px; }
 
-  .logo-text span { color: var(--accent); }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .status-dot {
-    width: 8px; height: 8px;
-    background: var(--accent3);
-    border-radius: 50%;
-    animation: blink 2s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .last-updated {
-    color: var(--muted);
-    font-size: 11px;
-  }
-
-  /* Layout */
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 32px;
-  }
-
-  /* Stats bar */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
+  /* Stats */
+  .stats-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:28px; }
   .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
+    background:var(--surface); border:1px solid var(--border); border-radius:4px;
+    padding:16px; position:relative; overflow:hidden; transition:border-color .2s;
   }
+  .stat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+  .stat-card.c1::before{background:var(--accent)}
+  .stat-card.c2::before{background:var(--accent2)}
+  .stat-card.c3::before{background:var(--accent3)}
+  .stat-card.c4::before{background:var(--accent4)}
+  .stat-card.c5::before{background:var(--blue)}
+  .stat-card:hover{border-color:rgba(255,255,255,.15)}
+  .stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+  .stat-value { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; }
+  .stat-card.c1 .stat-value{color:var(--accent)}
+  .stat-card.c2 .stat-value{color:var(--accent2)}
+  .stat-card.c3 .stat-value{color:var(--accent3)}
+  .stat-card.c4 .stat-value{color:var(--accent4)}
+  .stat-card.c5 .stat-value{color:var(--blue)}
 
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-
-  .stat-card.red::before { background: var(--accent); }
-  .stat-card.orange::before { background: var(--accent2); }
-  .stat-card.green::before { background: var(--accent3); }
-  .stat-card.yellow::before { background: var(--accent4); }
-  .stat-card.blue::before { background: #4361ee; }
-
-  .stat-card:hover { border-color: rgba(255,255,255,0.15); }
-
-  .stat-label {
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  .stat-card.red .stat-value { color: var(--accent); }
-  .stat-card.orange .stat-value { color: var(--accent2); }
-  .stat-card.green .stat-value { color: var(--accent3); }
-  .stat-card.yellow .stat-value { color: var(--accent4); }
-  .stat-card.blue .stat-value { color: #4361ee; }
-
-  /* Tab nav */
-  .tab-nav {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
-    overflow-x: auto;
-  }
-
+  /* Tabs */
+  .tab-nav { display:flex; border-bottom:1px solid var(--border); margin-bottom:20px; overflow-x:auto; }
   .tab-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 12px 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background:none; border:none; color:var(--muted); cursor:pointer;
+    padding:12px 18px; font-family:'Space Mono',monospace; font-size:11px;
+    text-transform:uppercase; letter-spacing:.08em;
+    border-bottom:2px solid transparent; transition:all .2s;
+    white-space:nowrap; display:flex; align-items:center; gap:8px;
   }
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-count { background:rgba(255,255,255,.06); color:var(--muted); padding:2px 6px; border-radius:2px; font-size:10px; }
+  .tab-btn.active .tab-count{background:rgba(230,57,70,.15);color:var(--accent)}
 
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  .tab-count {
-    background: rgba(230,57,70,0.15);
-    color: var(--accent);
-    padding: 2px 6px;
-    border-radius: 2px;
-    font-size: 10px;
-  }
-
-  .tab-btn:not(.active) .tab-count {
-    background: rgba(255,255,255,0.05);
-    color: var(--muted);
-  }
-
-  /* Search + filter */
-  .toolbar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-
-  .search-wrap {
-    flex: 1;
-    position: relative;
-  }
-
-  .search-wrap::before {
-    content: '⌕';
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 16px;
-  }
-
+  /* Toolbar */
+  .toolbar { display:flex; gap:10px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+  .search-wrap { flex:1; min-width:200px; position:relative; }
+  .search-wrap::before { content:'⌕'; position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:16px; }
   input[type="text"] {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    padding: 10px 12px 10px 36px;
-    outline: none;
-    transition: border-color 0.2s;
+    width:100%; background:var(--surface); border:1px solid var(--border);
+    border-radius:4px; color:var(--text); font-family:'Space Mono',monospace;
+    font-size:12px; padding:9px 12px 9px 36px; outline:none; transition:border-color .2s;
   }
-
-  input[type="text"]:focus { border-color: var(--accent); }
-  input[type="text"]::placeholder { color: var(--muted); }
-
+  input[type="text"]:focus{border-color:var(--accent)}
+  input[type="text"]::placeholder{color:var(--muted)}
   .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    padding: 10px 14px;
-    border-radius: 4px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-    white-space: nowrap;
+    background:var(--surface); border:1px solid var(--border); color:var(--muted);
+    cursor:pointer; padding:9px 12px; border-radius:4px;
+    font-family:'Space Mono',monospace; font-size:11px;
+    display:flex; align-items:center; gap:5px; transition:all .2s; white-space:nowrap;
   }
+  .filter-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+  .filter-btn.active-on{border-color:var(--accent3);color:var(--accent3)}
+  .filter-btn.active-off{border-color:var(--muted);color:var(--text)}
+  .filter-btn.active-all{border-color:var(--blue);color:var(--blue)}
 
-  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .filter-btn.active { border-color: var(--accent3); color: var(--accent3); }
+  /* Panels */
+  .data-panel{display:none}
+  .data-panel.active{display:block}
 
-  /* Data table */
-  .data-panel {
-    display: none;
+  /* Error banner */
+  .error-banner{
+    background:rgba(230,57,70,.08); border:1px solid rgba(230,57,70,.25);
+    border-radius:4px; padding:12px 16px; margin-bottom:16px;
+    color:var(--accent); font-size:12px; display:none;
   }
+  .error-banner.show{display:block}
 
-  .data-panel.active { display: block; }
-
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
+  /* Table */
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
   thead th {
-    background: var(--surface2);
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 64px;
+    background:var(--surface2); padding:9px 14px; text-align:left;
+    font-size:10px; text-transform:uppercase; letter-spacing:.1em;
+    color:var(--muted); border-bottom:1px solid var(--border);
   }
+  tbody tr { border-bottom:1px solid rgba(255,255,255,.04); transition:background .1s; }
+  tbody tr:hover{background:rgba(255,255,255,.03)}
+  tbody tr:last-child{border-bottom:none}
+  td{padding:9px 14px;vertical-align:middle;font-size:12px}
+  .badge { display:inline-block; padding:2px 7px; border-radius:2px; font-size:10px; letter-spacing:.05em; text-transform:uppercase; font-weight:700; }
+  .b-online{background:rgba(6,214,160,.15);color:var(--accent3)}
+  .b-offline{background:rgba(255,255,255,.05);color:var(--muted)}
+  .b-unknown{background:rgba(255,209,102,.12);color:var(--accent4)}
+  .entry-name{font-weight:700;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .entry-url{color:var(--muted);font-size:11px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .entry-url a{color:inherit;text-decoration:none;transition:color .2s}
+  .entry-url a:hover{color:var(--accent)}
+  .entry-ch{color:var(--muted);font-size:11px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.1s;
-  }
+  /* Loading */
+  .loading-state{padding:56px 24px;text-align:center;color:var(--muted)}
+  .loader{display:inline-block;width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-size:12px;display:block;margin-bottom:4px}
+  .loading-sub{font-size:10px;color:rgba(110,110,138,.55)}
 
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-  tbody tr:last-child { border-bottom: none; }
-
-  td {
-    padding: 10px 16px;
-    vertical-align: middle;
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .badge-online { background: rgba(6,214,160,0.15); color: var(--accent3); }
-  .badge-offline { background: rgba(255,255,255,0.06); color: var(--muted); }
-  .badge-unknown { background: rgba(255,209,102,0.12); color: var(--accent4); }
-  .badge-raas { background: rgba(230,57,70,0.15); color: var(--accent); }
-  .badge-leak { background: rgba(255,107,53,0.15); color: var(--accent2); }
-  .badge-intel { background: rgba(67,97,238,0.15); color: #4361ee; }
-  .badge-stealer { background: rgba(255,209,102,0.15); color: var(--accent4); }
-
-  .entry-name {
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .entry-url {
-    color: var(--muted);
-    font-size: 11px;
-    max-width: 280px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .entry-url a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .entry-url a:hover { color: var(--accent); }
-
-  .entry-desc {
-    color: var(--muted);
-    font-size: 11px;
-    max-width: 300px;
-  }
-
-  /* Loading state */
-  .loading-state {
-    padding: 60px 32px;
-    text-align: center;
-    color: var(--muted);
-  }
-
-  .loading-state .loader {
-    display: inline-block;
-    width: 24px; height: 24px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 16px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-text {
-    font-size: 12px;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .loading-sub {
-    font-size: 10px;
-    color: rgba(110,110,138,0.6);
-  }
-
-  /* Empty/error */
-  .empty-state {
-    padding: 60px 32px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-  }
+  .empty-state{padding:56px 24px;text-align:center;color:var(--muted);font-size:12px}
 
   /* Pagination */
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--muted);
+  .pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  .page-btns{display:flex;gap:4px;flex-wrap:wrap}
+  .page-btn{
+    background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+    cursor:pointer;padding:3px 9px;border-radius:2px;
+    font-family:'Space Mono',monospace;font-size:11px;transition:all .15s;
   }
+  .page-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+  .page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
-  .page-btns { display: flex; gap: 4px; }
-
-  .page-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 2px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    transition: all 0.15s;
+  footer{
+    border-top:1px solid var(--border);padding:18px 32px;
+    display:flex;justify-content:space-between;align-items:center;
+    color:var(--muted);font-size:11px;margin-top:40px;
   }
-
-  .page-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-  .page-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  /* Footer */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--muted);
-    font-size: 11px;
-    margin-top: 48px;
-  }
-
-  footer a { color: var(--accent); text-decoration: none; }
-
-  /* Terminal effect on load */
-  @keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .container { animation: fadeSlide 0.4s ease; }
+  footer a{color:var(--accent);text-decoration:none}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">◈</div>
-    <div>
-      <div class="logo-text">deep<span>dark</span>CTI</div>
-    </div>
+    <div class="logo-icon"></div>
+    <div class="logo-text">deep<span>dark</span>CTI</div>
   </div>
   <div class="header-right">
-    <div class="status-dot"></div>
-    <div class="last-updated" id="lastUpdated">Datos: 2026-04-01 20:46 UTC</div>
+    <div class="live-dot"></div>
+    <div id="lastUpdated">Inicializando…</div>
   </div>
 </header>
 
 <div class="container">
 
-  <!-- Stats bar -->
   <div class="stats-bar">
-    <div class="stat-card red">
-      <div class="stat-label">Ransomware Gangs</div>
-      <div class="stat-value" id="count-ransomware">—</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-label">Telegram Actors</div>
-      <div class="stat-value" id="count-telegram">—</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-label">Leak Sites</div>
-      <div class="stat-value" id="count-leak">—</div>
-    </div>
-    <div class="stat-card yellow">
-      <div class="stat-label">Infostealers</div>
-      <div class="stat-value" id="count-stealer">—</div>
-    </div>
-    <div class="stat-card blue">
-      <div class="stat-label">MaaS / RaaS</div>
-      <div class="stat-value" id="count-maas">—</div>
-    </div>
+    <div class="stat-card c1"><div class="stat-label">Ransomware Gangs</div><div class="stat-value" id="cnt-ransomware">—</div></div>
+    <div class="stat-card c2"><div class="stat-label">Telegram Actors</div><div class="stat-value" id="cnt-telegram">—</div></div>
+    <div class="stat-card c3"><div class="stat-label">Leak Sites</div><div class="stat-value" id="cnt-leak">—</div></div>
+    <div class="stat-card c4"><div class="stat-label">Infostealers</div><div class="stat-value" id="cnt-stealer">—</div></div>
+    <div class="stat-card c5"><div class="stat-label">MaaS / RaaS</div><div class="stat-value" id="cnt-maas">—</div></div>
   </div>
 
-  <!-- Tab nav -->
   <div class="tab-nav">
-    <button class="tab-btn active" data-tab="ransomware">
-      ◈ Ransomware Gangs
-      <span class="tab-count" id="tc-ransomware">0</span>
-    </button>
-    <button class="tab-btn" data-tab="telegram">
-      ◈ Telegram Actors
-      <span class="tab-count" id="tc-telegram">0</span>
-    </button>
-    <button class="tab-btn" data-tab="leak">
-      ◈ Leak Sites
-      <span class="tab-count" id="tc-leak">0</span>
-    </button>
-    <button class="tab-btn" data-tab="stealer">
-      ◈ Infostealers
-      <span class="tab-count" id="tc-stealer">0</span>
-    </button>
-    <button class="tab-btn" data-tab="maas">
-      ◈ MaaS / RaaS
-      <span class="tab-count" id="tc-maas">0</span>
-    </button>
+    <button class="tab-btn active" data-tab="ransomware">◈ Ransomware Gangs <span class="tab-count" id="tc-ransomware">…</span></button>
+    <button class="tab-btn" data-tab="telegram">◈ Telegram Actors <span class="tab-count" id="tc-telegram">…</span></button>
+    <button class="tab-btn" data-tab="leak">◈ Leak Sites <span class="tab-count" id="tc-leak">…</span></button>
+    <button class="tab-btn" data-tab="stealer">◈ Infostealers <span class="tab-count" id="tc-stealer">…</span></button>
+    <button class="tab-btn" data-tab="maas">◈ MaaS / RaaS <span class="tab-count" id="tc-maas">…</span></button>
   </div>
 
-  <!-- Toolbar -->
+  <div id="errorBanner" class="error-banner"></div>
+
   <div class="toolbar">
     <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Buscar por nombre, URL, descripción…">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, URL, canal…">
     </div>
-    <button class="filter-btn active" id="filterOnline">● Online</button>
-    <button class="filter-btn" id="filterOffline">● Offline</button>
-    <button class="filter-btn" id="filterAll">Todos</button>
+    <button class="filter-btn" data-filter="online">● Online</button>
+    <button class="filter-btn" data-filter="offline">○ Offline</button>
+    <button class="filter-btn active-all" data-filter="all">Todos</button>
   </div>
 
-  <!-- Panels -->
   <div id="panel-ransomware" class="data-panel active"></div>
   <div id="panel-telegram" class="data-panel"></div>
   <div id="panel-leak" class="data-panel"></div>
@@ -544,294 +231,265 @@
 </div>
 
 <footer>
-  <span>Datos: <a href="https://github.com/fastfire/deepdarkCTI" target="_blank">github.com/fastfire/deepdarkCTI</a> · Uso exclusivo CTI defensivo</span>
-  <span id="footerTimestamp"></span>
+  <span>Fuente: <a href="https://github.com/fastfire/deepdarkCTI" target="_blank">github.com/fastfire/deepdarkCTI</a> — Solo uso CTI defensivo</span>
+  <span id="buildTs"></span>
 </footer>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────
-const REPO = 'fastfire/deepdarkCTI';
-const BRANCH = 'main';
-const RAW = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+// ── Config ───────────────────────────────────────────────────────────────────
+// jsDelivr sirve GitHub como CDN con CORS abierto — soluciona el problema principal
+const CDN  = 'https://cdn.jsdelivr.net/gh/fastfire/deepdarkCTI@main';
+const GHRAW = 'https://raw.githubusercontent.com/fastfire/deepdarkCTI/main';
+const GHAPI = 'https://api.github.com/repos/fastfire/deepdarkCTI/contents';
 
-const FILES = {
-  ransomware: `${RAW}/ransomware_gang.md`,
-  telegram:   `${RAW}/telegram_threat_actors.md`,
-  leak:       `${RAW}/leak_sites.md`,
-  stealer:    `${RAW}/telegram_infostealer.md`,
-  maas:       `${RAW}/maas.md`,
+const SOURCES = {
+  ransomware: 'ransomware_gang.md',
+  telegram:   'telegram_threat_actors.md',
+  leak:       'leak_sites.md',
+  stealer:    'telegram_infostealer.md',
+  maas:       'maas.md',
 };
 
-const PAGE_SIZE = 50;
-let state = {
-  data: { ransomware: [], telegram: [], leak: [], stealer: [], maas: [] },
-  tab: 'ransomware',
-  query: '',
-  filter: 'online',
-  pages: { ransomware: 1, telegram: 1, leak: 1, stealer: 1, maas: 1 }
+const PAGE_SIZE = 75;
+
+const ST = {
+  data:   { ransomware:[], telegram:[], leak:[], stealer:[], maas:[] },
+  tab:    'ransomware',
+  query:  '',
+  filter: 'all',
+  pages:  { ransomware:1, telegram:1, leak:1, stealer:1, maas:1 },
 };
 
-// ─── FETCH ────────────────────────────────────────────────────────────────
-async function fetchFile(url) {
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(r.status);
-    return await r.text();
-  } catch(e) {
-    return null;
+// ── Fetch con 3 fallbacks ─────────────────────────────────────────────────────
+async function fetchText(tab) {
+  const f = SOURCES[tab];
+  const attempts = [
+    () => fetch(`${CDN}/${f}`,   { cache:'no-store' }).then(r => r.ok ? r.text() : Promise.reject()),
+    () => fetch(`${GHRAW}/${f}`, { cache:'no-store' }).then(r => r.ok ? r.text() : Promise.reject()),
+    () => fetch(`${GHAPI}/${f}`)
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(j => j.content ? atob(j.content.replace(/\n/g,'')) : Promise.reject()),
+  ];
+  for (const fn of attempts) {
+    try { return await fn(); } catch(_) {}
   }
+  return null;
 }
 
-// ─── PARSERS ──────────────────────────────────────────────────────────────
-
-function parseStatus(line) {
-  if (/ONLINE/i.test(line)) return 'online';
-  if (/OFFLINE/i.test(line)) return 'offline';
-  return 'unknown';
-}
-
-function extractUrl(line) {
-  const m = line.match(/https?:\/\/[^\s·|]+/);
-  return m ? m[0].replace(/[·|,;]+$/, '') : null;
-}
-
-function parseTelegramLine(line) {
-  line = line.trim();
-  if (!line || line.startsWith('#') || line.startsWith('|') || line.length < 8) return null;
-  const url = extractUrl(line);
-  if (!url) return null;
-  const status = parseStatus(line);
-  // Extract description: text after ONLINE/OFFLINE marker
-  let desc = line.replace(/https?:\/\/\S+/g, '').replace(/·/g, '').replace(/ONLINE|OFFLINE/g, '').trim();
-  desc = desc.replace(/\s+/g, ' ').trim().replace(/^[·\-–\s]+/, '');
-  return { url, status, name: url.replace('https://t.me/', '@'), desc: desc || '—', type: 'telegram' };
-}
-
-function parseRansomwareLine(line) {
-  line = line.trim();
-  if (!line || line.startsWith('#') || line.startsWith('|') || line.length < 8) return null;
-  const url = extractUrl(line);
-  const status = parseStatus(line);
-  // Try to get name from markdown link or first token
-  const nameMatch = line.match(/\[([^\]]+)\]/);
-  let name = nameMatch ? nameMatch[1] : (url ? url.replace(/https?:\/\//, '').split('/')[0] : line.slice(0, 40));
-  let desc = line.replace(/https?:\/\/\S+/g, '').replace(/\[[^\]]+\]/g, '').replace(/[·\-–]/g, ' ').replace(/ONLINE|OFFLINE/g, '').trim();
-  desc = desc.replace(/\s+/g, ' ').trim().slice(0, 120);
-  if (!name && !url) return null;
-  return { url, status, name: name || url, desc: desc || '—', type: 'ransomware' };
-}
-
-function parseGenericMd(text, type) {
-  const lines = text.split('\n');
+// ── Parser de tablas Markdown ─────────────────────────────────────────────────
+// Formato real del repo:
+//   | Name | Status | User:Password | Tox ID or other channel | RSS Feed |
+//   | ---- | ------ | ------------- | ----------------------- | -------- |
+//   | [LockBit](http://...) | ONLINE | | tox:xxx | |
+function parseTable(text, tab) {
   const entries = [];
-  for (const line of lines) {
-    const t = line.trim();
-    if (!t || t.startsWith('#') || t.startsWith('|') || t.startsWith('---')) continue;
-    const url = extractUrl(t);
-    if (!url) continue;
-    const status = parseStatus(t);
-    const nameMatch = t.match(/\[([^\]]+)\]/);
-    let name = nameMatch ? nameMatch[1] : url.replace(/https?:\/\//, '').split('/')[0].replace('t.me/', '@');
-    let desc = t.replace(/https?:\/\/\S+/g, '').replace(/\[[^\]]+\]\([^)]+\)/g, '').replace(/\[[^\]]+\]/g, '').replace(/[·\-–]/g, ' ').replace(/ONLINE|OFFLINE/g,'').trim();
-    desc = desc.replace(/\s+/g,' ').trim().slice(0, 120) || '—';
-    entries.push({ url, status, name: name || url, desc, type });
+  const lines = text.split('\n');
+  let headers = [];
+  let seenSep = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) { seenSep = false; headers = []; continue; }
+
+    // Separador de tabla: | --- | --- |
+    if (/^\|[\s\-:|]+\|/.test(line)) {
+      seenSep = true;
+      continue;
+    }
+
+    if (!line.startsWith('|') || !line.endsWith('|')) {
+      if (seenSep) { seenSep = false; headers = []; }
+      continue;
+    }
+
+    const cells = line.slice(1,-1).split('|').map(c => c.trim());
+
+    if (!seenSep) {
+      // Cabecera
+      headers = cells.map(c =>
+        c.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')
+      );
+      continue;
+    }
+
+    // Fila de datos
+    const row = {};
+    cells.forEach((c,i) => { row[headers[i] || `_${i}`] = c; });
+
+    // Nombre + URL
+    const nameCell = row.name || row._0 || '';
+    const md = nameCell.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    const name = md ? md[1] : nameCell.replace(/<[^>]+>/g,'').trim();
+    const url  = md ? md[2] : (firstUrl(nameCell) || firstUrl(row._1 || '') || '');
+
+    // Estado
+    const st = (row.status || row._1 || '').toUpperCase();
+    const status = st.includes('ONLINE')  ? 'online'
+                 : st.includes('OFFLINE') ? 'offline' : 'unknown';
+
+    // Canal de comunicación (columna 4 o similar)
+    const channel = row.tox_id_or_other_channel
+                 || row.communication_channel
+                 || row.channel
+                 || row._3 || '';
+
+    if (!name && !url) continue;
+    entries.push({ name, url, status, channel, tab });
   }
   return entries;
 }
 
-// ─── RENDER ───────────────────────────────────────────────────────────────
-
-function badgeForStatus(s) {
-  if (s === 'online') return '<span class="badge badge-online">● Online</span>';
-  if (s === 'offline') return '<span class="badge badge-offline">○ Offline</span>';
-  return '<span class="badge badge-unknown">? Unknown</span>';
+function firstUrl(s) {
+  const m = (s||'').match(/https?:\/\/[^\s)"]+/);
+  return m ? m[0].replace(/[,;.>)]+$/,'') : '';
 }
 
-function badgeForType(t) {
-  const map = {
-    ransomware: '<span class="badge badge-raas">Ransomware</span>',
-    telegram:   '<span class="badge badge-intel">Telegram</span>',
-    leak:       '<span class="badge badge-leak">Leak</span>',
-    stealer:    '<span class="badge badge-stealer">Infostealer</span>',
-    maas:       '<span class="badge badge-raas">MaaS</span>',
-  };
-  return map[t] || '';
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function badge(s) {
+  return s==='online'  ? '<span class="badge b-online">● Online</span>'
+       : s==='offline' ? '<span class="badge b-offline">○ Offline</span>'
+       :                 '<span class="badge b-unknown">? —</span>';
 }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function renderPanel(tab) {
   const panel = document.getElementById(`panel-${tab}`);
-  let items = state.data[tab] || [];
+  let items = ST.data[tab] || [];
 
-  // Filter
-  if (state.filter !== 'all') {
-    items = items.filter(i => i.status === state.filter);
-  }
-
-  // Search
-  if (state.query) {
-    const q = state.query.toLowerCase();
+  if (ST.filter !== 'all') items = items.filter(i => i.status === ST.filter);
+  if (ST.query) {
+    const q = ST.query.toLowerCase();
     items = items.filter(i =>
-      (i.name || '').toLowerCase().includes(q) ||
-      (i.url || '').toLowerCase().includes(q) ||
-      (i.desc || '').toLowerCase().includes(q)
+      (i.name||'').toLowerCase().includes(q) ||
+      (i.url||'').toLowerCase().includes(q)  ||
+      (i.channel||'').toLowerCase().includes(q)
     );
   }
 
   if (!items.length) {
-    panel.innerHTML = `<div class="empty-state">No se encontraron entradas con los filtros actuales.</div>`;
+    panel.innerHTML = '<div class="empty-state">Sin entradas con los filtros actuales.</div>';
     return;
   }
 
-  // Pagination
-  const totalPages = Math.ceil(items.length / PAGE_SIZE);
-  const page = Math.min(state.pages[tab], totalPages);
-  state.pages[tab] = page;
-  const slice = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const total = items.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const page = Math.max(1, Math.min(ST.pages[tab], totalPages));
+  ST.pages[tab] = page;
+  const slice = items.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
 
-  let rows = slice.map(item => `
-    <tr>
-      <td><div class="entry-name">${escHtml(item.name)}</div></td>
-      <td><div class="entry-url">${item.url ? `<a href="${escHtml(item.url)}" target="_blank">${escHtml(item.url)}</a>` : '—'}</div></td>
-      <td><div class="entry-desc">${escHtml(item.desc)}</div></td>
-      <td>${badgeForStatus(item.status)}</td>
-    </tr>
-  `).join('');
+  const rows = slice.map(it => `<tr>
+    <td><div class="entry-name" title="${esc(it.name)}">${esc(it.name)}</div></td>
+    <td><div class="entry-url">${it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.url)}</a>` : '—'}</div></td>
+    <td><div class="entry-ch" title="${esc(it.channel)}">${esc(it.channel)||'—'}</div></td>
+    <td>${badge(it.status)}</td>
+  </tr>`).join('');
 
-  // Pagination buttons
-  let pageButtons = '';
-  for (let p = 1; p <= Math.min(totalPages, 7); p++) {
-    pageButtons += `<button class="page-btn${p===page?' active':''}" data-page="${p}" data-tab="${tab}">${p}</button>`;
+  let pageHtml = '';
+  if (totalPages > 1) {
+    const btns = [];
+    const range = [...new Set([1, page-1, page, page+1, totalPages].filter(p => p>=1 && p<=totalPages))].sort((a,b)=>a-b);
+    let prev = 0;
+    for (const p of range) {
+      if (prev && p - prev > 1) btns.push('<span style="color:var(--muted);padding:0 4px">…</span>');
+      btns.push(`<button class="page-btn${p===page?' active':''}" data-page="${p}" data-tab="${tab}">${p}</button>`);
+      prev = p;
+    }
+    pageHtml = `<div class="pagination">
+      <span>${(page-1)*PAGE_SIZE+1}–${Math.min(page*PAGE_SIZE,total)} de ${total}</span>
+      <div class="page-btns">${btns.join('')}</div>
+    </div>`;
+  } else {
+    pageHtml = `<div class="pagination"><span>${total} entradas</span></div>`;
   }
-  if (totalPages > 7) pageButtons += `<span style="color:var(--muted);padding:0 8px">…${totalPages}</span>`;
 
-  panel.innerHTML = `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre / Actor</th>
-            <th>URL / Endpoint</th>
-            <th>Descripción</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <div class="pagination">
-        <span>${(page-1)*PAGE_SIZE+1}–${Math.min(page*PAGE_SIZE, items.length)} de ${items.length} entradas</span>
-        <div class="page-btns">${pageButtons}</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAll() {
-  for (const tab of Object.keys(state.data)) {
-    if (tab === state.tab) renderPanel(tab);
-  }
-  // lazy render current
-  renderPanel(state.tab);
+  panel.innerHTML = `<div class="table-wrap">
+    <table>
+      <thead><tr><th>Nombre / Grupo</th><th>URL / Endpoint</th><th>Canal / Contacto</th><th>Estado</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${pageHtml}
+  </div>`;
 }
 
 function updateCounts() {
-  for (const tab of Object.keys(state.data)) {
-    const n = state.data[tab].length;
-    document.getElementById(`count-${tab}`).textContent = n > 0 ? n.toLocaleString() : '—';
-    document.getElementById(`tc-${tab}`).textContent = n;
+  for (const tab of Object.keys(ST.data)) {
+    const n = ST.data[tab].length;
+    document.getElementById(`cnt-${tab}`).textContent = n ? n.toLocaleString('es-CO') : '—';
+    document.getElementById(`tc-${tab}`).textContent  = n;
   }
 }
 
-function escHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ─── LOAD ─────────────────────────────────────────────────────────────────
-
+// ── Carga ─────────────────────────────────────────────────────────────────────
 async function loadAll() {
-  // Show loading for each panel
-  for (const tab of Object.keys(FILES)) {
+  for (const tab of Object.keys(SOURCES)) {
     document.getElementById(`panel-${tab}`).innerHTML = `
       <div class="loading-state">
         <div class="loader"></div>
-        <span class="loading-text">Descargando fuentes desde GitHub…</span>
-        <span class="loading-sub">${FILES[tab]}</span>
+        <span class="loading-text">Descargando datos desde jsDelivr CDN…</span>
+        <span class="loading-sub">${CDN}/${SOURCES[tab]}</span>
       </div>`;
   }
 
-  const tasks = Object.entries(FILES).map(async ([tab, url]) => {
-    const text = await fetchFile(url);
-    if (!text) {
-      state.data[tab] = [];
-      return;
-    }
-    state.data[tab] = parseGenericMd(text, tab);
-  });
+  const errors = [];
+  await Promise.all(Object.keys(SOURCES).map(async tab => {
+    const text = await fetchText(tab);
+    if (!text) { errors.push(tab); ST.data[tab] = []; return; }
+    ST.data[tab] = parseTable(text, tab);
+  }));
 
-  await Promise.all(tasks);
+  updateCounts();
+  renderPanel(ST.tab);
+
+  if (errors.length) {
+    const b = document.getElementById('errorBanner');
+    b.textContent = `⚠ No se pudieron cargar: ${errors.join(', ')}. Intenta refrescar.`;
+    b.classList.add('show');
+  }
 
   const now = new Date();
   document.getElementById('lastUpdated').textContent =
-    `Actualizado: ${now.toLocaleDateString('es-CO')} ${now.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'})}`;
-  document.getElementById('footerTimestamp').textContent =
+    `Actualizado: ${now.toLocaleDateString('es-CO')} ${now.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('buildTs').textContent =
     `Build: ${now.toISOString().slice(0,19).replace('T',' ')} UTC`;
-
-  updateCounts();
-  renderPanel(state.tab);
 }
 
-// ─── EVENTS ───────────────────────────────────────────────────────────────
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    state.tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.data-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(`panel-${state.tab}`).classList.add('active');
-    renderPanel(state.tab);
-  });
-});
+// ── Eventos ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  ST.tab = btn.dataset.tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.data-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`panel-${ST.tab}`).classList.add('active');
+  renderPanel(ST.tab);
+}));
 
 document.getElementById('searchInput').addEventListener('input', e => {
-  state.query = e.target.value;
-  state.pages[state.tab] = 1;
-  renderPanel(state.tab);
+  ST.query = e.target.value;
+  Object.keys(ST.pages).forEach(t => ST.pages[t]=1);
+  renderPanel(ST.tab);
 });
 
-document.getElementById('filterOnline').addEventListener('click', () => {
-  state.filter = 'online';
-  updateFilterBtns();
-  renderPanel(state.tab);
-});
-document.getElementById('filterOffline').addEventListener('click', () => {
-  state.filter = 'offline';
-  updateFilterBtns();
-  renderPanel(state.tab);
-});
-document.getElementById('filterAll').addEventListener('click', () => {
-  state.filter = 'all';
-  updateFilterBtns();
-  renderPanel(state.tab);
-});
-
-function updateFilterBtns() {
-  document.getElementById('filterOnline').classList.toggle('active', state.filter === 'online');
-  document.getElementById('filterOffline').classList.toggle('active', state.filter === 'offline');
-  document.getElementById('filterAll').classList.toggle('active', state.filter === 'all');
-}
+document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => {
+  ST.filter = btn.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(b => {
+    b.classList.remove('active-on','active-off','active-all');
+  });
+  const cls = ST.filter==='online'?'active-on':ST.filter==='offline'?'active-off':'active-all';
+  btn.classList.add(cls);
+  Object.keys(ST.pages).forEach(t => ST.pages[t]=1);
+  renderPanel(ST.tab);
+}));
 
 document.addEventListener('click', e => {
-  if (e.target.classList.contains('page-btn')) {
-    const tab = e.target.dataset.tab;
-    const page = parseInt(e.target.dataset.page);
-    state.pages[tab] = page;
-    renderPanel(tab);
-    document.getElementById(`panel-${tab}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (!e.target.classList.contains('page-btn')) return;
+  const { tab, page } = e.target.dataset;
+  ST.pages[tab] = parseInt(page);
+  renderPanel(tab);
+  document.getElementById(`panel-${tab}`).scrollIntoView({behavior:'smooth',block:'start'});
 });
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
 loadAll();
 </script>
 </body>
