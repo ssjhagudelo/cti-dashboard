@@ -1,0 +1,32 @@
+{
+  "last_updated": "2026-04-01T20:45:07.356698+00:00",
+  "source_repo": "https://github.com/fastfire/deepdarkCTI",
+  "stats": {
+    "ransomware_gang": {
+      "total_entries": 616,
+      "online": 402,
+      "offline": 214
+    },
+    "telegram_threat_actors": {
+      "total_entries": 963,
+      "online": 335,
+      "offline": 628
+    },
+    "leak_sites": {
+      "total_entries": 0,
+      "online": 0,
+      "offline": 0
+    },
+    "telegram_infostealer": {
+      "total_entries": 124,
+      "online": 42,
+      "offline": 82
+    },
+    "maas": {
+      "total_entries": 10,
+      "online": 8,
+      "offline": 2
+    }
+  },
+  "total_entries": 1713
+}
